@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能题库系统 - 交互测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #1890ff;
+            text-align: center;
+        }
+        .btn {
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #096dd9;
+        }
+        .btn-success {
+            background: #52c41a;
+        }
+        .btn-success:hover {
+            background: #389e0d;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: none;
+        }
+        .status.success {
+            background: #f6ffed;
+            border: 1px solid #b7eb8f;
+            color: #52c41a;
+            display: block;
+        }
+        .status.error {
+            background: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: #ff4d4f;
+            display: block;
+        }
+        .status.info {
+            background: #e6f7ff;
+            border: 1px solid #91d5ff;
+            color: #1890ff;
+            display: block;
+        }
+        .result {
+            background: #fafafa;
+            border: 1px solid #d9d9d9;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .test-section {
+            background: #f6f6f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #434343;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            border: 1px solid #d9d9d9;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(24,144,255,0.3);
+            border-radius: 50%;
+            border-top-color: #1890ff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 智能题库系统 - 前后端交互测试</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            测试后端API连接和AI功能
+        </p>
+        
+        <!-- 状态显示 -->
+        <div id="status" class="status"></div>
+        
+        <!-- 后端连接测试 -->
+        <div class="test-section">
+            <h3>🔗 第1步：测试后端连接</h3>
+            <p>测试前端是否能连接到后端服务器</p>
+            <button class="btn" onclick="testBackendConnection()">测试后端连接</button>
+            <div id="connection-result" class="result"></div>
+        </div>
+        
+        <!-- AI解析测试 -->
+        <div class="test-section">
+            <h3>🧠 第2步：测试AI解析功能</h3>
+            <p>测试AI解析题目功能</p>
+            <textarea id="question-text">1、【单选题】中国的首都是哪里？
+A. 上海
+B. 北京
+C. 广州
+D. 深圳
+正确答案：B
+知识点：地理常识</textarea>
+            <br>
+            <button class="btn btn-success" onclick="testAIExplanation()">测试AI解析</button>
+            <div id="explain-result" class="result"></div>
+            
+            <!-- AI解析结果展示 -->
+            <div id="ai-result" style="display: none; margin-top: 20px;">
+                <h4>AI解析结果：</h4>
+                <div style="background: #e6f7ff; padding: 15px; border-radius: 5px;">
+                    <div style="margin-bottom: 15px;">
+                        <strong>📚 核心知识点：</strong>
+                        <div id="core-knowledge">加载中...</div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>✅ 答案分析：</strong>
+                        <div id="answer-analysis">加载中...</div>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>⚠️ 易错点：</strong>
+                        <div id="common-mistakes">加载中...</div>
+                    </div>
+                    <div>
+                        <strong>💡 解题技巧：</strong>
+                        <div id="solving-tips">加载中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 相似题测试 -->
+        <div class="test-section">
+            <h3>🔄 第3步：测试相似题生成</h3>
+            <p>测试AI生成相似题目功能</p>
+            <button class="btn" onclick="testSimilarQuestion()">生成相似题</button>
+            <div id="similar-result" class="result"></div>
+        </div>
+        
+        <!-- AI出题测试 -->
+        <div class="test-section">
+            <h3>🎯 第4步：测试AI智能出题</h3>
+            <p>根据学习材料自动生成题目</p>
+            <textarea id="learning-material">中华人民共和国成立于1949年10月1日，首都是北京。中国有56个民族，国土面积约960万平方公里。主要河流有长江、黄河。</textarea>
+            <br>
+            <button class="btn btn-success" onclick="testAIGenerate()">AI智能出题</button>
+            <div id="generate-result" class="result"></div>
+        </div>
+        
+        <!-- 系统信息 -->
+        <div class="test-section">
+            <h3>📊 系统状态</h3>
+            <p><strong>后端地址：</strong> <code id="api-url">http://localhost:3001/api</code></p>
+            <p><strong>后端状态：</strong> <span id="backend-status">未知</span></p>
+            <p><strong>测试说明：</strong></p>
+            <ol>
+                <li>按顺序测试每个功能</li>
+                <li>绿色状态表示成功</li>
+                <li>红色状态表示失败</li>
+                <li>如果失败，检查后端是否运行</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // 后端API地址
+        const API_BASE = 'http://localhost:3001/api';
+        
+        // 显示状态消息
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+            
+            // 5秒后自动隐藏
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // 测试后端连接
+        async function testBackendConnection() {
+            showStatus('正在连接后端服务器...', 'info');
+            document.getElementById('connection-result').innerHTML = '<div class="loading"></div> 连接中...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                
+                // 显示原始JSON
+                document.getElementById('connection-result').textContent = 
+                    JSON.stringify(data, null, 2);
+                
+                // 更新状态
+                document.getElementById('backend-status').textContent = '✅ 运行正常';
+                document.getElementById('backend-status').style.color = '#52c41a';
+                
+                showStatus('✅ 后端连接成功！', 'success');
+                
+            } catch (error) {
+                document.getElementById('connection-result').textContent = 
+                    `❌ 连接失败：${error.message}\n\n可能的原因：\n1. 后端服务器未启动\n2. 端口被占用\n3. 防火墙阻止连接`;
+                
+                document.getElementById('backend-status').textContent = '❌ 连接失败';
+                document.getElementById('backend-status').style.color = '#ff4d4f';
+                
+                showStatus('❌ 后端连接失败，请检查服务器是否运行', 'error');
+            }
+        }
+        
+        // 测试AI解析
+        async function testAIExplanation() {
+            const questionText = document.getElementById('question-text').value;
+            
+            if (!questionText.trim()) {
+                showStatus('请输入题目内容', 'error');
+                return;
+            }
+            
+            showStatus('正在请求AI解析...', 'info');
+            document.getElementById('explain-result').innerHTML = '<div class="loading"></div> AI解析中...';
+            
+            // 解析题目内容
+            const lines = questionText.split('\n');
+            const question = lines[0]?.replace(/^\d+[、\.]?\s*/, '') || '测试题目';
+            
+            let options = [];
+            let correctAnswer = '';
+            let knowledgePoints = [];
+            
+            lines.forEach(line => {
+                if (line.match(/^[A-D]\.\s*.+/)) {
+                    const key = line.charAt(0);
+                    const text = line.substring(2).trim();
+                    options.push({ key, text });
+                } else if (line.includes('正确答案')) {
+                    correctAnswer = line.split('：')[1] || line.split(':')[1] || 'B';
+                } else if (line.includes('知识点')) {
+                    const kp = line.split('：')[1] || line.split(':')[1] || '通用知识';
+                    knowledgePoints = [kp.trim()];
+                }
+            });
+            
+            // 如果没有选项，使用默认
+            if (options.length === 0) {
+                options = [
+                    { key: 'A', text: '选项A' },
+                    { key: 'B', text: '选项B' },
+                    { key: 'C', text: '选项C' },
+                    { key: 'D', text: '选项D' }
+                ];
+                correctAnswer = correctAnswer || 'B';
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/explain`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        options: options,
+                        correctAnswer: correctAnswer,
+                        userAnswer: 'B',
+                        knowledgePoints: knowledgePoints
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // 显示原始响应
+                document.getElementById('explain-result').textContent = 
+                    JSON.stringify(data, null, 2);
+                
+                // 显示格式化结果
+                if (data.success && data.data) {
+                    document.getElementById('ai-result').style.display = 'block';
+                    
+                    // 填充各部分内容
+                    document.getElementById('core-knowledge').textContent = 
+                        data.data.coreKnowledge || '暂无内容';
+                    document.getElementById('answer-analysis').textContent = 
+                        data.data.answerAnalysis || '暂无内容';
+                    document.getElementById('common-mistakes').textContent = 
+                        data.data.commonMistakes || '暂无内容';
+                    document.getElementById('solving-tips').textContent = 
+                        data.data.solvingTips || '暂无内容';
+                    
+                    showStatus('✅ AI解析成功！', 'success');
+                } else {
+                    showStatus(`❌ AI解析失败：${data.error}`, 'error');
+                }
+                
+            } catch (error) {
+                document.getElementById('explain-result').textContent = 
+                    `❌ 请求失败：${error.message}`;
+                showStatus('❌ 网络请求失败', 'error');
+            }
+        }
+        
+        // 测试相似题生成
+        async function testSimilarQuestion() {
+            showStatus('正在生成相似题...', 'info');
+            document.getElementById('similar-result').innerHTML = '<div class="loading"></div> 生成中...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/similar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        question: '中国的首都是哪里？',
+                        correctAnswer: '北京',
+                        questionType: 'single',
+                        knowledgePoints: ['地理常识']
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // 显示结果
+                document.getElementById('similar-result').textContent = 
+                    JSON.stringify(data, null, 2);
+                
+                if (data.success) {
+                    showStatus('✅ 相似题生成成功！', 'success');
+                } else {
+                    showStatus(`⚠️ 相似题生成失败：${data.error}`, 'error');
+                }
+                
+            } catch (error) {
+                document.getElementById('similar-result').textContent = 
+                    `❌ 请求失败：${error.message}`;
+                showStatus('❌ 网络请求失败', 'error');
+            }
+        }
+        
+        // 测试AI智能出题
+        async function testAIGenerate() {
+            const material = document.getElementById('learning-material').value;
+            
+            if (!material.trim()) {
+                showStatus('请输入学习材料', 'error');
+                return;
+            }
+            
+            showStatus('正在生成AI题目...', 'info');
+            document.getElementById('generate-result').innerHTML = '<div class="loading"></div> AI出题中...';
+            
+            try {
+                const response = await fetch(`${API_BASE}/generate-questions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        material: material,
+                        singleCount: 2,
+                        multiCount: 1,
+                        blankCount: 1
+                    })
+                });
+                
+                const data = await response.json();
+                
+                // 显示结果
+                document.getElementById('generate-result').textContent = 
+                    JSON.stringify(data, null, 2);
+                
+                if (data.success) {
+                    showStatus(`✅ AI出题成功，生成${data.data?.count || 0}道题`, 'success');
+                } else {
+                    showStatus(`⚠️ AI出题失败：${data.error}`, 'error');
+                }
+                
+            } catch (error) {
+                document.getElementById('generate-result').textContent = 
+                    `❌ 请求失败：${error.message}`;
+                showStatus('❌ 网络请求失败', 'error');
+            }
+        }
+        
+        // 页面加载时自动测试连接
+        window.onload = function() {
+            // 显示API地址
+            document.getElementById('api-url').textContent = API_BASE;
+            
+            // 3秒后自动测试连接
+            setTimeout(() => {
+                testBackendConnection();
+            }, 3000);
+        };
+    </script>
+</body>
+</html>

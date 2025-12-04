@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>调试工具</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; }
+        button { padding: 10px; margin: 5px; }
+        .log { background: #333; color: #0f0; padding: 10px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>系统调试工具</h1>
+    
+    <div class="section">
+        <h3>1. 后端状态检查</h3>
+        <button onclick="checkBackend()">检查后端</button>
+        <div id="backend-status" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h3>2. API密钥测试</h3>
+        <button onclick="testApiKey()">测试API密钥</button>
+        <div id="api-key-status" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h3>3. AI解析测试</h3>
+        <button onclick="testAIExplain()">测试AI解析</button>
+        <button onclick="testSimilar()">测试相似题</button>
+        <div id="ai-test-result" class="log"></div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        
+        async function checkBackend() {
+            const div = document.getElementById('backend-status');
+            try {
+                const res = await fetch(`${API_BASE}/health`);
+                const data = await res.json();
+                div.innerHTML = JSON.stringify(data, null, 2);
+            } catch (e) {
+                div.innerHTML = `错误: ${e.message}`;
+            }
+        }
+        
+        async function testApiKey() {
+            const div = document.getElementById('api-key-status');
+            const testData = {
+                question: "测试题目",
+                correctAnswer: "B",
+                userAnswer: "B",
+                knowledgePoints: ["测试"]
+            };
+            
+            try {
+                const res = await fetch(`${API_BASE}/explain`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                const data = await res.json();
+                div.innerHTML = JSON.stringify(data, null, 2);
+            } catch (e) {
+                div.innerHTML = `错误: ${e.message}`;
+            }
+        }
+        
+        async function testAIExplain() {
+            const div = document.getElementById('ai-test-result');
+            const testData = {
+                question: "中国的首都是哪里？",
+                options: [
+                    { key: "A", text: "上海" },
+                    { key: "B", text: "北京" },
+                    { key: "C", text: "广州" },
+                    { key: "D", text: "深圳" }
+                ],
+                correctAnswer: "B",
+                userAnswer: "B",
+                knowledgePoints: ["地理常识"]
+            };
+            
+            try {
+                const res = await fetch(`${API_BASE}/explain`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                const data = await res.json();
+                div.innerHTML = JSON.stringify(data, null, 2);
+            } catch (e) {
+                div.innerHTML = `错误: ${e.message}`;
+            }
+        }
+        
+        async function testSimilar() {
+            const div = document.getElementById('ai-test-result');
+            const testData = {
+                question: "中国的首都是哪里？",
+                correctAnswer: "北京",
+                questionType: "single",
+                knowledgePoints: ["地理常识"]
+            };
+            
+            try {
+                const res = await fetch(`${API_BASE}/similar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                const data = await res.json();
+                div.innerHTML = JSON.stringify(data, null, 2);
+            } catch (e) {
+                div.innerHTML = `错误: ${e.message}`;
+            }
+        }
+        
+        // 自动检查后端
+        checkBackend();
+    </script>
+</body>
+</html>
